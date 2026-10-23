@@ -1,0 +1,46 @@
+#laya-radar-badge {
+    margin: 15px 0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    z-index: 9999;
+}
+
+/* Green: Safe / Fair Client */
+.laya-safe {
+    background-color: #f0fdf4;
+    border: 2px solid #22c55e;
+    color: #14532d;
+}
+
+/* Yellow: Caution */
+.laya-warning {
+    background-color: #fefce8;
+    border: 2px solid #eab308;
+    color: #713f12;
+}
+
+/* Red: High Risk / Scam */
+.laya-danger {
+    background-color: #fef2f2;
+    border: 2px solid #ef4444;
+    color: #7f1d1d;
+}
+
+.laya-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.laya-detail {
+    font-size: 13px;
+    opacity: 0.9;
+}
