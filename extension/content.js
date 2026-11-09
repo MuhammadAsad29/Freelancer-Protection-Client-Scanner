@@ -65,6 +65,14 @@ function renderBadge(result, anchorElement) {
     console.log("[LAYA Radar] Badge successfully injected under Title!");
 }
 
+function renderError(message, anchorElement) {
+    const badge = document.createElement("div");
+    badge.id = "laya-radar-badge";
+    badge.className = "laya-warning";
+    badge.textContent = `LAYA Radar could not scan this job: ${message}`;
+    anchorElement.insertAdjacentElement("afterend", badge);
+}
+
 let lastScannedText = "";
 let isScanning = false;
 
@@ -86,9 +94,15 @@ async function scanCurrentJob() {
         { action: "analyze_job", text: jobText },
         (response) => {
             isScanning = false;
+            if (chrome.runtime.lastError) {
+                renderError(chrome.runtime.lastError.message, titleEl);
+                return;
+            }
             if (response && response.success) {
                 console.log("[LAYA Radar] Analysis received:", response.data);
                 renderBadge(response.data, titleEl);
+            } else {
+                renderError(response?.error || "No response from the API.", titleEl);
             }
         }
     );
