@@ -12,10 +12,10 @@
   - `nightmare_micromanager`: 24/7 availability or heavy micromanagement signals.
   - `unpaid_sample_demand`: Unpaid trial tasks or free custom work demands.
   - `telegram_crypto_scam`: Off-platform communication attempts (Telegram, WhatsApp, crypto).
-  - `legitimate_fair_client`: Verified clean jobs with realistic expectations and fair pay.
+  - `legitimate_fair_client`: Jobs classified as having realistic expectations and fair pay.
 - **📊 1–5 Danger Score Badge:** Injects clear visual indicators (🟢 Safe | ⚠️ Warning | 🚨 Nightmare) directly below the job title on Upwork.
-- **⚡ Ultra-Fast Local CPU Inference:** Powered by **LAYA** (~35ms decision latencies on standard CPU, zero GPU requirement).
-- **🔒 Privacy-First Architecture:** Keeps job analysis on your own private backend server.
+- **⚡ Local CPU Inference:** Powered by **LAYA**; a GPU is not required.
+- **🔒 Local by default:** The extension sends job text to the API at `127.0.0.1`. If you enable a public tunnel, requests are forwarded through that tunnel.
 
 ---
 
@@ -80,22 +80,21 @@ python -m venv .venv
 # On Windows (PowerShell):
 .venv\Scripts\Activate.ps1
 
-# Install dependencies
-pip install -r requirements.txt
-pip install laya
+# Install dependencies (includes LAYA)
+python -m pip install -r requirements.txt
 ```
 
 ### 3. Run the API Server
 
 ```bash
-uvicorn server:app --host 0.0.0.0 --port 8000
+python -m uvicorn server:app --host 127.0.0.1 --port 8000
 ```
 
-The server will initialize the LAYA model in RAM and listen on `http://localhost:8000`.
+The server will initialize the LAYA model in RAM and listen on `http://127.0.0.1:8000`. Keep this terminal open while using the extension.
 
-To verify health:
+To verify the API is ready, open `http://127.0.0.1:8000/health` in a browser or run:
 ```bash
-curl http://localhost:8000/health
+curl http://127.0.0.1:8000/health
 ```
 
 ---
@@ -106,33 +105,39 @@ curl http://localhost:8000/health
 2. Enable **Developer mode** (toggle in the top right).
 3. Click **Load unpacked**.
 4. Select the `extension/` folder inside this project directory.
-5. Visit any job details page on **Upwork** (e.g., `https://www.upwork.com/jobs/...`).
-6. The **LAYA Radar Badge** will automatically inject right below the job title!
+5. Start the API server using the instructions above.
+6. Visit or refresh a job details page on **Upwork**. The **LAYA Radar Badge** should appear below the job title.
+
+After changing extension files, click **Reload** for the extension at `chrome://extensions/`, then refresh the Upwork tab. You do not need to load the unpacked folder again.
 
 ---
 
 ## 🧪 Running Test Cases
 
-Run the pre-built test suite to evaluate 3 real-world job posting scenarios:
+Run the pre-built test suite to evaluate six sample job posting scenarios:
 
 ```bash
 python test_cases.py
 ```
 
+The tests load the LAYA model and may take time on the first run.
+
 ---
 
 ## 🌐 Public Tunneling (Cloudflare Tunnel)
 
-If you want to access your local API server remotely or test the extension over secure HTTPS:
+The extension uses the local API by default; a tunnel is only needed if you want to access the API remotely or test through a public HTTPS URL. The API has no authentication, so anyone with the tunnel URL may be able to submit job text while the tunnel is running.
 
 1. Download `cloudflared` from [Cloudflare Releases](https://github.com/cloudflare/cloudflared/releases/latest).
-2. Start the tunnel in a separate terminal while `server.py` is running:
+2. Keep the API server running and start the tunnel in a separate terminal:
 
 ```bash
 cloudflared tunnel --url http://localhost:8000
 ```
 
-3. Update `extension/background.js` and `extension/manifest.json` with your generated `https://<your-subdomain>.trycloudflare.com` URL.
+3. Copy the generated `https://<your-subdomain>.trycloudflare.com` address. In `extension/background.js`, replace the URL in the `fetch(...)` call with that address followed by `/analyze`.
+4. At `chrome://extensions/`, click **Reload** for the extension and refresh the Upwork tab. A quick-tunnel URL changes when a new tunnel is started, so update the fetch URL again if it changes.
+5. Stop the tunnel when you are done testing.
 
 ---
 
@@ -141,7 +146,7 @@ cloudflared tunnel --url http://localhost:8000
 - **Model:** `convaiinnovations/laya`
 - **Architecture:** ModernBERT-Large (421M Parameters)
 - **Task:** Non-autoregressive System 1 decision engine with calibrated probabilities.
-- **Execution:** 100% CPU-compatible, single-pass decision matrix (~35ms).
+- **Execution:** CPU-compatible, single-pass decision matrix. Inference latency depends on the machine and model initialization.
 
 ---
 
